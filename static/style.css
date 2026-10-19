@@ -1,0 +1,79 @@
+:root {
+    --app-bg: #f4efe6;
+    --app-surface: #fffaf3;
+    --app-ink: #1f2933;
+    --app-muted: #6b7280;
+    --app-primary: #c96f3b;
+    --app-primary-dark: #8c3f19;
+    --app-accent: #1f5c5b;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(201, 111, 59, 0.18), transparent 28%),
+        linear-gradient(180deg, #f8f2e8 0%, #f1eadc 100%);
+    color: var(--app-ink);
+    min-height: 100vh;
+}
+
+.app-navbar {
+    background: linear-gradient(90deg, var(--app-primary-dark), var(--app-accent));
+}
+
+.app-card,
+.hero-card,
+.stat-card,
+.flow-card {
+    background: rgba(255, 250, 243, 0.94);
+    border: 1px solid rgba(140, 63, 25, 0.08);
+    border-radius: 1.25rem;
+}
+
+.hero-card {
+    box-shadow: 0 1.5rem 3rem rgba(31, 41, 51, 0.08);
+}
+
+.flow-card {
+    padding: 1.5rem;
+}
+
+.flow-list {
+    padding-left: 1.2rem;
+}
+
+.flow-list li + li {
+    margin-top: 0.5rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    box-shadow: 0 0.8rem 2rem rgba(31, 41, 51, 0.06);
+}
+
+.stat-label {
+    display: inline-block;
+    color: var(--app-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+}
+
+.btn-primary {
+    background-color: var(--app-primary);
+    border-color: var(--app-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--app-primary-dark);
+    border-color: var(--app-primary-dark);
+}
+
+.code-sample {
+    background: #1f2933;
+    color: #f9fafb;
+    border-radius: 0.9rem;
+    padding: 1rem;
+    overflow-x: auto;
+}

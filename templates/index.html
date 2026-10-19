@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Prediction System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark app-navbar">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" href="{{ url_for('home') }}">Student Performance Prediction System</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('add_student') }}">Add Student</a>
+                <a class="nav-link" href="{{ url_for('view_students') }}">Students</a>
+                <a class="nav-link" href="{{ url_for('predict') }}">Predict</a>
+                <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="hero-card p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <span class="badge text-bg-light mb-3">Flask + MySQL + Machine Learning</span>
+                    <h1 class="display-5 fw-bold mb-3">Student Performance Prediction System</h1>
+                    <p class="lead text-secondary mb-4">Store student records, run performance predictions, save results, and display analytics in one Flask application.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-lg">Add Student</a>
+                        <a href="{{ url_for('predict') }}" class="btn btn-outline-dark btn-lg">Enter Prediction Data</a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="flow-card">
+                        <h2 class="h5 mb-3">System Flow</h2>
+                        <ol class="mb-0 flow-list">
+                            <li>Add Student</li>
+                            <li>Store in MySQL</li>
+                            <li>Enter Prediction Data</li>
+                            <li>Send data to ML model</li>
+                            <li>Save result in database</li>
+                            <li>Display analytics in dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
