@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Prediction System | Live Interactive Demo</title>
+    <meta name="description" content="Interactive browser demo of the Student Performance Prediction System powered by Scikit-Learn Logistic Regression.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-card: rgba(18, 26, 44, 0.75);
+            --bg-card-hover: rgba(26, 37, 63, 0.85);
+            --border-card: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(99, 102, 241, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-primary: #6366f1;
+            --accent-primary-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --pass-color: #10b981;
+            --pass-glow: rgba(16, 185, 129, 0.25);
+            --fail-color: #f43f5e;
+            --fail-glow: rgba(244, 63, 94, 0.25);
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.18), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 50%, rgba(16, 185, 129, 0.08), transparent),
+                radial-gradient(ellipse 60% 40% at 0% 70%, rgba(244, 63, 94, 0.08), transparent);
+        }
+
+        /* Top Bar */
+        .top-navbar {
+            backdrop-filter: blur(16px);
+            background: rgba(9, 13, 22, 0.85);
+            border-bottom: 1px solid var(--border-card);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 1.5rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-gh {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-gh:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Container */
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        /* Hero */
+        .hero-banner {
+            text-align: center;
+            max-width: 780px;
+            margin: 0 auto 3rem;
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.9rem;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            margin-bottom: 1.25rem;
+        }
+
+        .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 4vw, 3.25rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Preset Chips */
+        .presets-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .preset-chip {
+            padding: 0.4rem 0.9rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-chip:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Main Predictor Grid */
+        .predictor-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .predictor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-card);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: border-color 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        /* Slider Input Groups */
+        .input-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.6rem;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .input-value-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            background: rgba(99, 102, 241, 0.15);
+            color: #c7d2fe;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .range-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            box-shadow: 0 0 12px var(--accent-primary);
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 18px var(--accent-primary);
+        }
+
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+        }
+
+        /* Result Card */
+        .result-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-glow {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 0.5s ease;
+        }
+
+        .result-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.6rem 2rem;
+            border-radius: 14px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .status-pass {
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid var(--pass-color);
+            color: var(--pass-color);
+            box-shadow: 0 0 30px var(--pass-glow);
+        }
+
+        .status-fail {
+            background: rgba(244, 63, 94, 0.15);
+            border: 2px solid var(--fail-color);
+            color: var(--fail-color);
+            box-shadow: 0 0 30px var(--fail-glow);
+        }
+
+        /* Circular Meter */
+        .meter-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .meter-svg {
+            transform: rotate(-90deg);
+            width: 180px;
+            height: 180px;
+        }
+
+        .meter-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 12;
+        }
+
+        .meter-progress {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 471;
+            stroke-dashoffset: 471;
+            transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
+        }
+
+        .meter-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .meter-percent {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+        }
+
+        .meter-caption {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 0.3rem;
+        }
+
+        .recommendation-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .recommendation-box strong {
+            color: var(--text-primary);
+        }
+
+        /* Formula & Weights Section */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .code-box {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0b111e;
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+            overflow-x: auto;
+        }
+
+        .code-hl-var { color: #38bdf8; }
+        .code-hl-val { color: #a78bfa; }
+        .code-hl-op { color: #f43f5e; }
+        .code-hl-fn { color: #34d399; }
+
+        /* Dataset Table */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-card);
+            background: #0b111e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border-card);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge-pill-sm {
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-fail { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+        .btn-test-row {
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-test-row:hover {
+            background: var(--accent-primary);
+            color: #ffffff;
+        }
+
+        /* Architecture comparison card */
+        .callout-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(59, 130, 246, 0.04));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+
+        .callout-icon {
+            font-size: 1.75rem;
+            line-height: 1;
+        }
+
+        .callout-content h4 {
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+            color: #c7d2fe;
+        }
+
+        .callout-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-card);
+        }
+
+        footer a {
+            color: #a5b4fc;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header class="top-navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-badge">
+                <div class="brand-icon">🎓</div>
+                <div>
+                    <div class="brand-name">Student Performance Predictor</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Logistic Regression ML Model</div>
+                </div>
+            </a>
+            <div class="nav-actions">
+                <a href="https://github.com/03DxD12/Student-Performance-Prediction-System" target="_blank" rel="noopener noreferrer" class="btn-gh">
+                    <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    </svg>
+                    GitHub Source
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-container">
+        <!-- Hero Section -->
+        <section class="hero-banner">
+            <div class="pill-badge">
+                <span class="pill-dot"></span>
+                Live Client-Side ML Model &bull; Real-time Inference
+            </div>
+            <h1 class="hero-title">Predict Academic Success with Machine Learning</h1>
+            <p class="hero-subtitle">
+                Trained on student study habits, attendance percentage, and prior grades to forecast whether a student is on track to <strong>Pass</strong> or <strong>Fail</strong>.
+            </p>
+
+            <div class="presets-row">
+                <span style="font-size: 0.825rem; color: var(--text-muted); margin-right: 0.25rem;">Quick Presets:</span>
+                <button class="preset-chip" onclick="applyPreset(7.5, 88, 85)">🌟 Top Performer</button>
+                <button class="preset-chip" onclick="applyPreset(4.0, 70, 72)">⚖️ Borderline Student</button>
+                <button class="preset-chip" onclick="applyPreset(1.5, 52, 58)">⚠️ At-Risk Student</button>
+                <button class="preset-chip" onclick="applyPreset(5.0, 80, 75)">🎯 Average Achiever</button>
+            </div>
+        </section>
+
+        <!-- Predictor Grid -->
+        <div class="predictor-grid">
+            <!-- Inputs Card -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span>⚙️</span> Student Metrics
+                    </h2>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Interactive Sliders</span>
+                </div>
+
+                <!-- Study Hours Input -->
+                <div class="input-group">
+                    <div class="input-header">
+                        <label class="input-label" for="studyHoursSlider">
+                            📖 Daily Study Hours
+                        </label>
+                        <span class="input-value-badge" id="studyHoursValue">4.0 hrs</span>
+                    </div>
+                    <input type="range" class="range-slider" id="studyHoursSlider" min="0" max="12" step="0.5" value="4.0" oninput="updatePrediction()">
+                    <div class="slider-scale">
+                        <span>0 hrs</span>
+                        <span>4 hrs</span>
+                        <span>8 hrs</span>
+                        <span>12 hrs</span>
+                    </div>
+                </div>
+
+                <!-- Attendance Rate Input -->
+                <div class="input-group">
+                    <div class="input-header">
+                        <label class="input-label" for="attendanceSlider">
+                            🏫 Attendance Rate (%)
+                        </label>
+                        <span class="input-value-badge" id="attendanceValue">70%</span>
+                    </div>
+                    <input type="range" class="range-slider" id="attendanceSlider" min="0" max="100" step="1" value="70" oninput="updatePrediction()">
+                    <div class="slider-scale">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>75%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+
+                <!-- Previous Grade Input -->
+                <div class="input-group">
+                    <div class="input-header">
+                        <label class="input-label" for="gradeSlider">
+                            📊 Previous Grade
+                        </label>
+                        <span class="input-value-badge" id="gradeValue">72</span>
+                    </div>
+                    <input type="range" class="range-slider" id="gradeSlider" min="40" max="100" step="1" value="72" oninput="updatePrediction()">
+                    <div class="slider-scale">
+                        <span>40 (F)</span>
+                        <span>60</span>
+                        <span>75</span>
+                        <span>100 (A+)</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-card); font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between;">
+                    <span>Adjust sliders to see the probability shift dynamically.</span>
+                    <button onclick="applyPreset(4.0, 70, 72)" style="background: none; border: none; color: #a5b4fc; cursor: pointer; text-decoration: underline;">Reset</button>
+                </div>
+            </div>
+
+            <!-- Result Card -->
+            <div class="glass-card result-card" id="resultCard">
+                <div class="result-glow" id="resultGlow"></div>
+                <div class="result-content">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        Predicted Outcome
+                    </div>
+
+                    <div class="status-badge status-pass" id="statusBadge">
+                        PASS
+                    </div>
+
+                    <!-- Circular Progress Meter -->
+                    <div class="meter-container">
+                        <svg class="meter-svg" viewBox="0 0 180 180">
+                            <circle class="meter-bg" cx="90" cy="90" r="75"></circle>
+                            <circle class="meter-progress" id="meterCircle" cx="90" cy="90" r="75"></circle>
+                        </svg>
+                        <div class="meter-center">
+                            <span class="meter-percent" id="meterPercent">87%</span>
+                            <span class="meter-caption">Pass Chance</span>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-box" id="recommendationText">
+                        <strong>Strong Outlook:</strong> Current attendance and study habits place this student safely above the passing threshold.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Model Insights & Formula -->
+        <div class="details-grid">
+            <!-- Mathematical Formulation -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3 class="card-title">📐 Mathematical Formula</h3>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Logistic Regression</span>
+                </div>
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    The prediction is computed using the logit score <span style="font-family: 'JetBrains Mono'; color: #38bdf8;">z</span> passed through the Sigmoid activation function <span style="font-family: 'JetBrains Mono'; color: #34d399;">&sigma;(z) = 1 / (1 + e<sup>-z</sup>)</span>:
+                </p>
+
+                <div class="code-box" id="formulaBox">
+                    z = (<span class="code-hl-val">0.4096</span> &times; <span class="code-hl-var" id="fHours">4.0</span>) 
+                      + (<span class="code-hl-val">0.8961</span> &times; <span class="code-hl-var" id="fAtt">70</span>) 
+                      + (<span class="code-hl-val">0.1896</span> &times; <span class="code-hl-var" id="fGrade">72</span>) 
+                      - <span class="code-hl-op">74.8757</span><br>
+                    z = <span class="code-hl-fn" id="fZValue">+3.018</span><br>
+                    P(Pass) = 1 / (1 + e<sup>-(<span id="fZVal2">3.018</span>)</sup>) = <strong style="color: #10b981;" id="fProb">0.9534</strong>
+                </div>
+            </div>
+
+            <!-- Feature Weights & Importance -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3 class="card-title">⚖️ Feature Weights (Impact)</h3>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Scikit-Learn Coef</span>
+                </div>
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Trained model coefficients indicate which factor most strongly influences the pass/fail determination:
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.825rem; margin-bottom: 0.3rem;">
+                            <span><strong>Attendance Rate</strong> (Dominant factor)</span>
+                            <span style="font-family: 'JetBrains Mono'; color: #34d399;">+0.8961</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.08); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: #34d399; width: 89%; height: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.825rem; margin-bottom: 0.3rem;">
+                            <span><strong>Study Hours</strong> (Moderate impact)</span>
+                            <span style="font-family: 'JetBrains Mono'; color: #38bdf8;">+0.4096</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.08); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: #38bdf8; width: 45%; height: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.825rem; margin-bottom: 0.3rem;">
+                            <span><strong>Previous Grade</strong> (Baseline performance)</span>
+                            <span style="font-family: 'JetBrains Mono'; color: #a78bfa;">+0.1896</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.08); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: #a78bfa; width: 22%; height: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Dataset Explorer -->
+        <div class="glass-card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">📑 Training Dataset Benchmark Samples</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Click "Test Input" on any sample record to instantly feed its parameters into the live model.</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sample ID</th>
+                            <th>Study Hours</th>
+                            <th>Attendance</th>
+                            <th>Previous Grade</th>
+                            <th>Actual Result</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#01</td>
+                            <td>1.0 hr</td>
+                            <td>45%</td>
+                            <td>55</td>
+                            <td><span class="badge-pill-sm badge-fail">Fail (0)</span></td>
+                            <td><button class="btn-test-row" onclick="applyPreset(1.0, 45, 55)">Test Input</button></td>
+                        </tr>
+                        <tr>
+                            <td>#05</td>
+                            <td>3.0 hrs</td>
+                            <td>60%</td>
+                            <td>65</td>
+                            <td><span class="badge-pill-sm badge-fail">Fail (0)</span></td>
+                            <td><button class="btn-test-row" onclick="applyPreset(3.0, 60, 65)">Test Input</button></td>
+                        </tr>
+                        <tr>
+                            <td>#08</td>
+                            <td>4.0 hrs</td>
+                            <td>68%</td>
+                            <td>70</td>
+                            <td><span class="badge-pill-sm badge-pass">Pass (1)</span></td>
+                            <td><button class="btn-test-row" onclick="applyPreset(4.0, 68, 70)">Test Input</button></td>
+                        </tr>
+                        <tr>
+                            <td>#12</td>
+                            <td>6.0 hrs</td>
+                            <td>80%</td>
+                            <td>78</td>
+                            <td><span class="badge-pill-sm badge-pass">Pass (1)</span></td>
+                            <td><button class="btn-test-row" onclick="applyPreset(6.0, 80, 78)">Test Input</button></td>
+                        </tr>
+                        <tr>
+                            <td>#16</td>
+                            <td>8.0 hrs</td>
+                            <td>88%</td>
+                            <td>86</td>
+                            <td><span class="badge-pill-sm badge-pass">Pass (1)</span></td>
+                            <td><button class="btn-test-row" onclick="applyPreset(8.0, 88, 86)">Test Input</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Architecture Callout -->
+        <div class="callout-box">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+                <h4>Looking for the full Flask + MySQL Database App?</h4>
+                <p>
+                    This GitHub Pages site serves as a live, interactive demonstration of the machine learning model. The complete project repository also includes a full <strong>Python Flask Web Application</strong> featuring MySQL student CRUD records, database migration scripts, and analytics dashboards.
+                </p>
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <a href="https://github.com/03DxD12/Student-Performance-Prediction-System#readme" target="_blank" rel="noopener noreferrer" class="btn-gh" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4);">
+                        📖 View Local Setup Guide
+                    </a>
+                    <a href="https://github.com/03DxD12/Student-Performance-Prediction-System" target="_blank" rel="noopener noreferrer" class="btn-gh">
+                        ⭐ Star on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Student Performance Prediction System &bull; Group Performance Task #4 &bull; Built with Flask, Scikit-Learn &amp; MySQL</p>
+        <p style="margin-top: 0.35rem;"><a href="https://github.com/03DxD12/Student-Performance-Prediction-System">Repository on GitHub</a></p>
+    </footer>
+
+    <!-- Interactive Prediction Logic -->
+    <script>
+        // Exact weights extracted from the trained model.pkl (LogisticRegression)
+        const W_STUDY = 0.40955618;
+        const W_ATTENDANCE = 0.89614949;
+        const W_PREV_GRADE = 0.18959698;
+        const INTERCEPT = -74.87567799;
+
+        // Circumference of meter circle (r=75): 2 * pi * 75 = ~471.24
+        const CIRCUMFERENCE = 2 * Math.PI * 75;
+
+        function updatePrediction() {
+            const hours = parseFloat(document.getElementById('studyHoursSlider').value);
+            const attendance = parseFloat(document.getElementById('attendanceSlider').value);
+            const grade = parseFloat(document.getElementById('gradeSlider').value);
+
+            // Update badge displays
+            document.getElementById('studyHoursValue').textContent = hours.toFixed(1) + ' hrs';
+            document.getElementById('attendanceValue').textContent = attendance + '%';
+            document.getElementById('gradeValue').textContent = grade;
+
+            // Compute Logit z
+            const z = (W_STUDY * hours) + (W_ATTENDANCE * attendance) + (W_PREV_GRADE * grade) + INTERCEPT;
+
+            // Compute Sigmoid Probability
+            const prob = 1 / (1 + Math.exp(-z));
+            const percent = Math.round(prob * 100);
+            const isPass = prob >= 0.5;
+
+            // Update Meter & Status
+            const statusBadge = document.getElementById('statusBadge');
+            const resultGlow = document.getElementById('resultGlow');
+            const meterCircle = document.getElementById('meterCircle');
+            const meterPercent = document.getElementById('meterPercent');
+            const recommendation = document.getElementById('recommendationText');
+
+            meterPercent.textContent = percent + '%';
+
+            // Offset for progress circle
+            const offset = CIRCUMFERENCE - (prob * CIRCUMFERENCE);
+            meterCircle.style.strokeDashoffset = offset;
+
+            if (isPass) {
+                statusBadge.textContent = 'PASS';
+                statusBadge.className = 'status-badge status-pass';
+                meterCircle.style.stroke = '#10b981';
+                resultGlow.style.background = 'radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 70%)';
+
+                if (attendance < 65) {
+                    recommendation.innerHTML = '<strong>Caution on Attendance:</strong> The student is passing, but attendance is below 65%. Improving attendance will provide a safer margin.';
+                } else if (hours < 2.5) {
+                    recommendation.innerHTML = '<strong>Good Potential:</strong> Passing outcome driven by solid attendance and past grades, but increasing daily study time will maintain consistency.';
+                } else {
+                    recommendation.innerHTML = '<strong>Strong Academic Outlook:</strong> Excellent combination of study commitment and attendance. Expected to pass with distinction.';
+                }
+            } else {
+                statusBadge.textContent = 'FAIL';
+                statusBadge.className = 'status-badge status-fail';
+                meterCircle.style.stroke = '#f43f5e';
+                resultGlow.style.background = 'radial-gradient(circle, rgba(244, 63, 94, 0.3) 0%, transparent 70%)';
+
+                if (attendance < 60) {
+                    recommendation.innerHTML = '<strong>Urgent Attendance Intervention:</strong> Attendance has the highest predictive weight (+0.896). Raising attendance to at least 70% is essential.';
+                } else if (hours < 3.0) {
+                    recommendation.innerHTML = '<strong>Increase Study Time:</strong> Dedicating at least 3.5 to 4 hours daily to study is required to cross the passing threshold.';
+                } else {
+                    recommendation.innerHTML = '<strong>At-Risk Status:</strong> Comprehensive support needed in coursework and foundational review to bring grades into the passing tier.';
+                }
+            }
+
+            // Update Formula Display
+            document.getElementById('fHours').textContent = hours.toFixed(1);
+            document.getElementById('fAtt').textContent = attendance;
+            document.getElementById('fGrade').textContent = grade;
+            const zStr = (z >= 0 ? '+' : '') + z.toFixed(3);
+            document.getElementById('fZValue').textContent = zStr;
+            document.getElementById('fZVal2').textContent = z.toFixed(3);
+            const probElem = document.getElementById('fProb');
+            probElem.textContent = prob.toFixed(4);
+            probElem.style.color = isPass ? '#10b981' : '#f43f5e';
+        }
+
+        function applyPreset(hours, attendance, grade) {
+            document.getElementById('studyHoursSlider').value = hours;
+            document.getElementById('attendanceSlider').value = attendance;
+            document.getElementById('gradeSlider').value = grade;
+            updatePrediction();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePrediction();
+        });
+    </script>
+</body>
+</html>
