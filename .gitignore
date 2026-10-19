@@ -16,7 +16,12 @@ ENV/
 .vscode/
 .idea/
 
+# SQLite databases
+*.sqlite3
+*.db
+
 # OS generated files
 Thumbs.db
 Desktop.ini
 .DS_Store
+

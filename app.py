@@ -1,5 +1,8 @@
+import os
 from pathlib import Path
 import pickle
+import re
+import sqlite3
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -9,35 +12,88 @@ from sklearn.linear_model import LogisticRegression
 
 
 app = Flask(__name__)
-app.secret_key = "student-performance-secret"
+app.secret_key = os.environ.get("SECRET_KEY", "student-performance-secret")
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "model.pkl"
 DATASET_PATH = BASE_DIR / "student_data.csv"
+SQLITE_PATH = BASE_DIR / "flask_db.sqlite3"
+
+
+class SQLiteAdapter:
+    def __init__(self, db_path):
+        self.conn = sqlite3.connect(db_path, check_same_thread=False)
+        self.is_sqlite = True
+
+    def cursor(self):
+        return SQLiteCursor(self.conn.cursor())
+
+    def commit(self):
+        self.conn.commit()
+
+
+class SQLiteCursor:
+    def __init__(self, cur):
+        self.cur = cur
+
+    def execute(self, query, params=None):
+        clean_query = re.sub(r"%s", "?", query)
+        if params is None:
+            return self.cur.execute(clean_query)
+        return self.cur.execute(clean_query, params)
+
+    def fetchall(self):
+        return self.cur.fetchall()
+
+    def fetchone(self):
+        return self.cur.fetchone()
+
+    def close(self):
+        self.cur.close()
+
 
 def create_database_connection():
+    db_host = os.environ.get("DB_HOST", "localhost")
+    db_user = os.environ.get("DB_USER", "root")
+    db_password = os.environ.get("DB_PASSWORD", "")
+    db_name = os.environ.get("DB_NAME", "flask_db")
+    db_port = int(os.environ.get("DB_PORT", 3306))
+
     try:
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="flask_db",
+            host=db_host,
+            user=db_user,
+            password=db_password,
+            database=db_name,
+            port=db_port,
+            connect_timeout=3,
         )
+        connection.is_sqlite = False
+        return connection
     except mysql.connector.Error as err:
-        if err.errno != errorcode.ER_BAD_DB_ERROR:
-            raise
+        if err.errno == errorcode.ER_BAD_DB_ERROR:
+            try:
+                connection = mysql.connector.connect(
+                    host=db_host,
+                    user=db_user,
+                    password=db_password,
+                    port=db_port,
+                    connect_timeout=3,
+                )
+                cursor = connection.cursor()
+                cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`")
+                cursor.close()
+                connection.database = db_name
+                connection.is_sqlite = False
+                return connection
+            except Exception:
+                pass
 
-        connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-        )
-        cursor = connection.cursor()
-        cursor.execute("CREATE DATABASE IF NOT EXISTS flask_db")
-        cursor.close()
-        connection.database = "flask_db"
-
-    return connection
+        print(f"[INFO] MySQL unavailable on {db_host}:{db_port}. Using SQLite fallback for cloud/Render deployment.")
+        return SQLiteAdapter(str(SQLITE_PATH))
+    except Exception as e:
+        print(f"[INFO] Database connection error ({e}). Using SQLite fallback.")
+        return SQLiteAdapter(str(SQLITE_PATH))
 
 
 db = create_database_connection()
@@ -49,29 +105,54 @@ def get_cursor():
 
 def ensure_tables():
     cursor = get_cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS students (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100),
-            course VARCHAR(100)
+    if getattr(db, "is_sqlite", False):
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS students (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                course TEXT
+            )
+            """
         )
-        """
-    )
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS predictions (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            student_id INT,
-            study_hours FLOAT,
-            attendance FLOAT,
-            previous_grade FLOAT,
-            result VARCHAR(50),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (student_id) REFERENCES students(id)
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER,
+                study_hours REAL,
+                attendance REAL,
+                previous_grade REAL,
+                result TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES students(id)
+            )
+            """
         )
-        """
-    )
+    else:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS students (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(100),
+                course VARCHAR(100)
+            )
+            """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                student_id INT,
+                study_hours FLOAT,
+                attendance FLOAT,
+                previous_grade FLOAT,
+                result VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (student_id) REFERENCES students(id)
+            )
+            """
+        )
     db.commit()
     cursor.close()
 
@@ -283,4 +364,6 @@ def dashboard():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    debug_mode = os.environ.get("FLASK_DEBUG", "True").lower() in ("true", "1", "yes")
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)
