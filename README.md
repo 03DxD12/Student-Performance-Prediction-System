@@ -1,6 +1,21 @@
 # Student Performance Prediction System
 
-A web-based Machine Learning application built with **Flask**, **MySQL**, and **Scikit-Learn** to predict student academic outcomes based on study habits, attendance, and past performance.
+[![Live on Render](https://img.shields.io/badge/Render-Live_App-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://student-performance-prediction-system-4pkl.onrender.com/)
+[![Live on GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Interactive_Demo-222222?style=for-the-badge&logo=github&logoColor=white)](https://03dxd12.github.io/Student-Performance-Prediction-System/)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-Web_Framework-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine_Learning-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+
+A full-stack Machine Learning web application built with **Flask**, **Scikit-Learn**, and **MySQL / SQLite** to predict student academic outcomes based on study habits, attendance percentage, and prior grades.
+
+---
+
+### 🌐 Live Deployments
+
+- 🚀 **Full Cloud Web Application (Render)**: [https://student-performance-prediction-system-4pkl.onrender.com/](https://student-performance-prediction-system-4pkl.onrender.com/)  
+  *(Full CRUD, database persistence, ML prediction logging, and analytics dashboard)*
+- ⚡ **Interactive Client Demo (GitHub Pages)**: [https://03dxd12.github.io/Student-Performance-Prediction-System/](https://03dxd12.github.io/Student-Performance-Prediction-System/)  
+  *(Instant real-time slider inference with formula & weight visualization)*
 
 ---
 
